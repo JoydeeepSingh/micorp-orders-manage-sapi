@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <http:listener-config name="micorp-order-manage-sapi-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="micorp-order-manage-sapi-config" api="resource::ce235d46-115c-497c-b0e2-474afd80f5e9:micorp-order-manage-sapi:1.0.1:raml:zip:micorp-order-manage-sapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="micorp-order-manage-sapi-main" doc:id="f5dedf6f-0a21-4913-810d-7926d81f0be7">
+        <http:listener config-ref="micorp-order-manage-sapi-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <ee:transform doc:name="var : correlationId" doc:id="b25e546f-c52d-4943-9d2d-e9b76ed59bbe">
+            <ee:message />
+            <ee:variables>
+                <ee:set-variable variableName="correlationId"><![CDATA[%dw 2.0
+output application/java
+---
+attributes.headers.correlationId default correlationId]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <apikit:router config-ref="micorp-order-manage-sapi-config" />
+        <error-handler ref="common-error-handler" />
+    </flow>
+    <flow name="micorp-order-manage-sapi-console">
+        <http:listener config-ref="micorp-order-manage-sapi-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="micorp-order-manage-sapi-config" />
+        <error-handler ref="common-error-handler" />
+    </flow>
+    <flow name="get:\customer\(orderId):micorp-order-manage-sapi-config">
+        <flow-ref doc:name="get-customer-impl-sub-flow" doc:id="df3785bb-c529-4b54-b81a-3f92f92669c3" name="get-customer-impl-sub-flow" />
+    </flow>
+    <flow name="get:\item\(orderId):micorp-order-manage-sapi-config">
+        <flow-ref doc:name="get-item-impl-sub-flow" doc:id="dcb5a958-8afd-4d44-ba08-545865e5ea3f" name="get-item-impl-sub-flow" />
+    </flow>
+    <flow name="get:\order\(poNum):micorp-order-manage-sapi-config">
+        <flow-ref doc:name="get-order-impl-sub-flow" doc:id="1c3773fc-bf5a-43d6-81ae-b1163476e783" name="get-order-sub-flow" />
+    </flow>
+    <flow name="post:\customer:application\json:micorp-order-manage-sapi-config">
+        <flow-ref doc:name="post-customer-impl-sub-flow" doc:id="2bd277e2-5269-42d6-82d7-cc0a5bb9b14e" name="post-customer-impl-sub-flow" />
+    </flow>
+    <flow name="post:\item:application\json:micorp-order-manage-sapi-config">
+        <flow-ref doc:name="post-item-impl-sub-flow" doc:id="23a1a144-2cba-4ee3-88e6-2be0f8eee4ff" name="post-item-impl-sub-flow" />
+    </flow>
+    <flow name="post:\order:application\json:micorp-order-manage-sapi-config">
+        <flow-ref doc:name="post-order-impl-sub-flow" doc:id="42794012-bc1d-4929-9a9d-53a1d0594564" name="post-order-impl-sub-flow" />
+    </flow>
+</mule>

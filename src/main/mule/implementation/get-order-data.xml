@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="get-order-sub-flow" doc:id="f746dd92-f4cd-46b7-90b1-0e72e80f91d0" >
+		<logger level="INFO" doc:name="Start Logger" doc:id="2362f898-d027-408e-901c-d1de60297c92" message="Start" />
+		<set-variable value="#[attributes.uriParams.'poNum']" doc:name="var : poNum" doc:id="62409dfe-e102-471f-adf2-3a83de99e13d" variableName="poNum" />
+		<salesforce:query doc:name="Get OrderData" doc:id="f9ee19f2-f175-453c-a766-436a998b2285" config-ref="Salesforce_Config" >
+			<salesforce:salesforce-query ><![CDATA[SELECT fields (custom) from Orderrr__c where poNumber__c=':poNumber' limit 3]]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[{
+	poNumber : vars.poNum
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Output" doc:id="8f17a0f1-2ab9-4b34-b7e7-5f7285ce518a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	poNumber: payload.poNumber__c,
+	signatureRequiredFlag: payload.signatureRequiredFlag__c,
+	shipInstructions: payload.shipInstructions__c,
+	orderId: payload.orderId_c,
+	shipInstructions: payload.shipInstructions__c,
+	giftWrapFlag: payload.giftWrapFlag__c,
+	giftWrapMessage: payload.giftWrapMessage__c,
+	currencyCode: payload.currencyCode__c,
+	subTotal: payload.subTotal__c
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

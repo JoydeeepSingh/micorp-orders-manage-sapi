@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="get-item-impl-sub-flow" doc:id="bf37675a-0f67-4138-a8a2-3d79f976c12b" >
+		<logger level="INFO" doc:name="Start Logger" doc:id="e6fb2274-fe8c-487b-b614-17cf51964968" message="Start" />
+		<set-variable value="#[attributes.uriParams.'orderId']" doc:name="var : orderId" doc:id="8f40f002-66cf-40dc-a5aa-e12c67bce721" variableName="orderId" />
+		<salesforce:query doc:name="Get Item Data" doc:id="d0590440-0715-49ad-8613-0012ab668bcd" config-ref="Salesforce_Config" >
+			<salesforce:salesforce-query ><![CDATA[SELECT fields (custom) from Item__c where id__c=':orderId' limit 100]]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[{
+	orderId : vars.orderId
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Output" doc:id="ec6a1dd6-ef3f-48cf-aa83-e08a7437e62c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Id": payload.id__c reduce $,
+	"category": payload.category__c reduce $,
+	"quantity": payload.quantity__c reduce $,
+	"size": payload.size__c reduce $,
+	"orderId": payload.Orderrr__c  reduce $
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

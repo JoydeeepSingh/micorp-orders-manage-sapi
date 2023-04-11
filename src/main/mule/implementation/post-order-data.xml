@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="post-order-impl-sub-flow" doc:id="04e19ded-a36a-4f33-8076-9e28ff72fe9f" >
+		<logger level="INFO" doc:name="Start Logger" doc:id="3fcea5ee-09f7-4ead-a497-007288e8bb17" message="Start"/>
+		<ee:transform doc:name="Transformation" doc:id="e7f75649-7001-409a-b16f-bbac4935fe40">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	poNumber__c: payload.poNumber,
+	signatureRequiredFlag__c: payload.signatureRequiredFlag,
+	shipInstructions__c: payload.shipInstructions,
+	orderId__c: payload.orderId,
+	shipInstructions__c: payload.shipInstructions,
+	giftWrapFlag__c: payload.giftWrapFlag,
+	giftWrapMessage__c: payload.giftWrapMessage,
+	currencyCode__c: payload.currencyCode,
+	subTotal__c: payload.subTotal
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create doc:name="Create" doc:id="e62227e1-1f2c-4ba0-90e2-17360739a994" config-ref="Salesforce_Config" type="Orderrr__c"/>
+		<ee:transform doc:name="Success Response" doc:id="eb02390f-36eb-4c53-b00a-3afb82b435c6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  orderId: payload.items.id reduce $,
+  message: "Order created successfully"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End Logger" doc:id="fc160816-2d81-42dc-8446-c6cb4a89f2ef" message="End"/>
+	</sub-flow>
+</mule>

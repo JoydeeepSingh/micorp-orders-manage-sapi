@@ -1,0 +1,8 @@
+#  Secure Local configuration
+
+
+# Salesforce Configuration
+
+salesforce:
+  password: "![6nY13ty+CYAA4FAGOAV1hA==]"
+  securityToken: "![2XuvE3BvMWHVppgblvVhzvM1TkCiTYrM2051urzI3S4=]"

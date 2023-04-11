@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="postorder" format="json">
+      <types:shape format="weave" example="examples/postorder.json"><![CDATA[%dw 2.0
+
+type postorder = {|
+  poNumber: String, 
+  signatureRequiredFlag: Boolean, 
+  shipInstructions: String, 
+  giftWrapFlag: Boolean, 
+  giftWrapMessage: String, 
+  currencyCode: String, 
+  subTotal: Number {"typeId": "double"}, 
+  email: String
+|} {"example": "{\\\"poNumber\\\":\\\"123461\\\",\\\"signatureRequiredFlag\\\":false,\\\"shipInstructions\\\":\\\"Don't break it\\\",\\\"giftWrapFlag\\\":true,\\\"giftWrapMessage\\\":\\\"You rock!\\\",\\\"currencyCode\\\":\\\"USD\\\",\\\"subTotal\\\":41.5,\\\"email\\\":\\\"test@test.com\\\"}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+</types:mule>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="post-customer-impl-sub-flow" doc:id="705751ae-a264-438e-99f6-d38af669ec66" >
+		<logger level="INFO" doc:name="Start Logger" doc:id="67c026ca-4189-4fe6-b07b-1efa62b80df0" message="Start"/>
+		<ee:transform doc:name="Input" doc:id="1f35fc61-6475-4ddd-8a00-a50378ee30f5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	orderid__c: payload.id,
+	category__c: payload.category,
+	quantity__c: payload.quantity,
+	size__c: payload.size,
+	Order__c: payload.orderId
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create type="Customer__c" doc:name="Create Customer" doc:id="c33a5a9e-b21e-4233-8036-aeb3bbd7a446" config-ref="Salesforce_Config"/>
+		<ee:transform doc:name="Success Message" doc:id="3c3d5767-06f5-4da6-af52-152fd1f9b953" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  orderId: payload.items.id reduce $,
+  message: "Item Created Successfully"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End Logger" doc:id="985af7cb-50f0-485c-9a1b-1a9c59229771" message="Flow-Completed"/>
+	</sub-flow>
+</mule>
